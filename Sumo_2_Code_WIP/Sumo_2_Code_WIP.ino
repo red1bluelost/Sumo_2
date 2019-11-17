@@ -32,18 +32,6 @@ LEDSensor fLeftSensor {10,0};
 LEDSensor fRightSensor {9,0};
 LEDSensor bLeftSensor {8,0};
 LEDSensor bRightSensor {11,0};
-/*//constants for the FRONT side sensors
-const int leftSensor = 10;     // Assign sensor pins for two down sensors
-const int rightSensor = 9;
-//variable for the FRONT sensor states
-int lsensorState = 0;          // Initialize sensor variable 
-int rsensorState = 0;
-//constants for the BACK side sensors
-const int BACKleftSensor = 8;     // Assign sensor pins for two down sensors
-const int BACKrightSensor = 11;
-//variable for the BACK sensor states
-int BACKlsensorState = 0;          // Initialize sensor variable 
-int BACKrsensorState = 0;*/
 
 //bool used with functions to break loops
 bool dontRepeat = false;  //for edge sensing causing a breaking in code
@@ -54,17 +42,23 @@ bool startStrat;   //runs the starting strategy
 void setup() {
   Serial.begin (9600);        //set up a serial connection with the computer
 
-  //set up front sensor
+  //set up distance sensors
   pinMode(FrontDist.trigPin, OUTPUT);   //the trigger pin will output pulses of electricity 
   pinMode(FrontDist.echoPin, INPUT);    //the echo pin will measure the duration of pulses coming back from the distance sensor
+  pinMode(LeftDist.trigPin, OUTPUT);
+  pinMode(LeftDist.echoPin, INPUT);
+  pinMode(RightDist.trigPin, OUTPUT);
+  pinMode(RightDist.echoPin, INPUT);
 
   //set up motors
   servo_R.attach(rightMotor);  //connect Right motor single wire to Digital Port rightMotor
   servo_L.attach(leftMotor);  //connect Left motor single wire to Digital Port leftMotor
 
-  //set up sensors
+  //set up LED sensors
   pinMode(fLeftSensor.Sensor, INPUT);   // Declare assigned sensor pins as input
   pinMode(fRightSensor.Sensor, INPUT);
+  pinMode(bLeftSensor.Sensor, INPUT);
+  pinMode(bRightSensor.Sensor, INPUT);
 
   //starts from a stop
   servo_R.write(90);
@@ -107,7 +101,7 @@ void loop() {
 //------------------FUNCTIONS-------------------------------
 
 //RETURNS THE DISTANCE MEASURED BY THE HC-SR04 DISTANCE SENSOR
-float getDistance(DistanceSensor sensor)
+void getDistance(DistanceSensor& sensor)
 {
   float echoTime;                   //variable to store the time it takes for a ping to bounce off an object
   float calculatedDistance;         //variable to store the distance calculated from the echo time
@@ -124,7 +118,7 @@ float getDistance(DistanceSensor sensor)
 
   calculatedDistance = 0.9831*calculatedDistance + 0.14; //change to actual distance based on Excel Data Analysis
   
-  return calculatedDistance;              //send back the distance that was calculated
+  sensor.distance = calculatedDistance;              //send back the distance that was calculated
 }
 
 
@@ -242,7 +236,7 @@ bool edgeSense(){
 
 void spinAndScan(int range){
     do{     //spin and scan loop
-    FrontDist.distance = getDistance(FrontDist);  //check for robot in front sensor
+    getDistance(FrontDist);  //check for robot in front sensor
     edgeSense();  //make sure not to run off the edge of the mat
   }while(FrontDist.distance > range);   //keep scanning until something is seen within 24 inches
 }
