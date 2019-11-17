@@ -7,22 +7,16 @@
 Servo servo_R;  //declare servo objects first -servo_R for right side and servo_L for left
 Servo servo_L;
 
-//constants for the FRONT facing distance sensor
-const int trigPin = 5;           //connects to the echo pin on the distance sensor       
-const int echoPin = 6;           //connects to the trigger pin on the distance sensor     
-//constants for the LEFT facing distance sensor
-const int LEFTtrigPin = 2;           //connects to the echo pin on the distance sensor       
-const int LEFTechoPin = 3;           //connects to the trigger pin on the distance sensor
-//constants for the RIGHT facing distance sensor
-const int RIGHTtrigPin = 4;           //connects to the echo pin on the distance sensor       
-const int RIGHTechoPin = 7;           //connects to the trigger pin on the distance sensor
-
-//variable to hold the distance from the FRONT sensor
-float distanceFront = 0;               //stores the distance measured by the distance sensor
-//variable to hold the distance from the LEFT sensor
-float distanceLEFT = 0;               //stores the distance measured by the distance sensor
-//variable to hold the distance from the RIGHT sensor
-float distanceRIGHT = 0;               //stores the distance measured by the distance sensor
+//creates a struct to be used with the three distance sensors
+struct DistanceSensor {
+  const int trigPin;  //connects to the echo pin on the distance sensor
+  const int echoPin;  //connects to the trigger pin on the distance sensor
+  float distance;     //stores the distance measure by the distance sensor
+};
+//sets structs to hold pins for the Front, Left, and Right
+DistanceSensor FrontDist {5,6};
+DistanceSensor LeftDist {2,3};
+DistanceSensor RightDist {4,7};
 
 //constants for motor pins
 const int rightMotor = 12;
@@ -51,8 +45,8 @@ void setup() {
   Serial.begin (9600);        //set up a serial connection with the computer
 
   //set up front sensor
-  pinMode(trigPin, OUTPUT);   //the trigger pin will output pulses of electricity 
-  pinMode(echoPin, INPUT);    //the echo pin will measure the duration of pulses coming back from the distance sensor
+  pinMode(FrontDist.trigPin, OUTPUT);   //the trigger pin will output pulses of electricity 
+  pinMode(FrontDist.echoPin, INPUT);    //the echo pin will measure the duration of pulses coming back from the distance sensor
 
   //set up motors
   servo_R.attach(rightMotor);  //connect Right motor single wire to Digital Port rightMotor
@@ -103,17 +97,17 @@ void loop() {
 //------------------FUNCTIONS-------------------------------
 
 //RETURNS THE DISTANCE MEASURED BY THE HC-SR04 DISTANCE SENSOR
-float getDistance()
+float getDistance(DistanceSensor sensor)
 {
   float echoTime;                   //variable to store the time it takes for a ping to bounce off an object
   float calculatedDistance;         //variable to store the distance calculated from the echo time
   
   //send out an ultrasonic pulse that's 10ms long
-  digitalWrite(trigPin, HIGH);
+  digitalWrite(sensor.trigPin, HIGH);
   delayMicroseconds(10); 
-  digitalWrite(trigPin, LOW);
+  digitalWrite(sensor.trigPin, LOW);
 
-  echoTime = pulseIn(echoPin, HIGH);      //use the pulsein command to see how long it takes for the
+  echoTime = pulseIn(sensor.echoPin, HIGH);      //use the pulsein command to see how long it takes for the
                                           //pulse to bounce back to the sensor
 
   calculatedDistance = echoTime / 148.0;  //calculate the distance of the object that reflected the pulse (half the bounce time multiplied by the speed of sound)
@@ -238,7 +232,7 @@ bool edgeSense(){
 
 void spinAndScan(int range){
     do{     //spin and scan loop
-    distanceFront = getDistance();  //check for robot in front sensor
+    FrontDist.distance = getDistance(FrontDist);  //check for robot in front sensor
     edgeSense();  //make sure not to run off the edge of the mat
-  }while(distanceFront > range);   //keep scanning until something is seen within 24 inches
+  }while(FrontDist.distance > range);   //keep scanning until something is seen within 24 inches
 }
