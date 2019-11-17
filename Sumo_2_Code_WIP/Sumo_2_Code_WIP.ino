@@ -132,13 +132,6 @@ void congruentMove(float moveSpeed, bool forward) {
   }
 } //end motorMove()
 
-//a function to just stop movement
-void stopMove(){
-  //stop
-  servo_R.write(90);
-  servo_L.write(90); 
-}
-
 //Input desired distance (in) and speed 1-90 and direction
 void straightMove(float range, float moveSpeed, char goOrBack){ //input range (inch), speed (1-90), and f or b for direction
 
@@ -189,7 +182,7 @@ void turnHold(char lORr, bool doAngle, float angle) { //turn left or right, if d
   }
   if(doAngle){  //turn for certain amount of degrees
     delay((angle/360)*3350);
-    stopMove(); //stop after rotation finishes
+    congruentMove(0,true); //stop after rotation finishes
   }
 }
 
