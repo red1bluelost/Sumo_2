@@ -61,8 +61,7 @@ void setup() {
   pinMode(bRightSensor.Sensor, INPUT);
 
   //starts from a stop
-  servo_R.write(90);
-  servo_L.write(90);
+  congruentMove(0,true);
 
   //do starting strategy only after set up
   startStrat = true;
@@ -121,6 +120,24 @@ void getDistance(DistanceSensor& sensor)
   sensor.distance = calculatedDistance;              //send back the distance that was calculated
 }
 
+//function to use when writing to the motors to move at the same speed
+void congruentMove(float moveSpeed, bool forward) {
+  if(forward) { //move forward
+    servo_R.write(90-moveSpeed);
+    servo_L.write(90+moveSpeed);
+  }
+  else {  //move backward
+    servo_R.write(90+moveSpeed);
+    servo_L.write(90-moveSpeed);
+  }
+} //end motorMove()
+
+//a function to just stop movement
+void stopMove(){
+  //stop
+  servo_R.write(90);
+  servo_L.write(90); 
+}
 
 //Input desired distance (in) and speed 1-90 and direction
 void straightMove(float range, float moveSpeed, char goOrBack){ //input range (inch), speed (1-90), and f or b for direction
@@ -135,12 +152,10 @@ void straightMove(float range, float moveSpeed, char goOrBack){ //input range (i
   //set motors to move at the speed
   switch(goOrBack){
     case 'f': //move forward
-    servo_R.write(90 - moveSpeed);
-    servo_L.write(90 + moveSpeed);
+    congruentMove(moveSpeed,true);
     break;
     case 'b': //move back
-    servo_R.write(90 + moveSpeed);
-    servo_L.write(90 - moveSpeed);
+    congruentMove(moveSpeed,false);
     break;
   } //end switch to move forward or back at a certain speed
 
@@ -152,21 +167,12 @@ void charge(float moveSpeed, char goOrBack){ //set to move without any delays
   //set motors to move at the speed
   switch(goOrBack){
     case 'f': //move forward
-    servo_R.write(90 - moveSpeed);
-    servo_L.write(90 + moveSpeed);
+    congruentMove(moveSpeed,true);
     break;
     case 'b': //move back
-    servo_R.write(90 + moveSpeed);
-    servo_L.write(90 - moveSpeed);
+    congruentMove(moveSpeed,false);
     break;
   } //end switch to move forward or back at a certain speed
-}
-
-//a function to just stop movement
-void stopMove(){
-  //stop
-  servo_R.write(90);
-  servo_L.write(90); 
 }
 
 //a function to turn the robot and with the option of rotating for a specific angle of rotation
@@ -210,8 +216,7 @@ bool edgeSense(){
   //execute evasion pattern if something is sensed
   if(fRightSensor.sensorState == LOW){  //if the right sensor is triggered
     //back up
-    servo_R.write(180); //right motor counterclockwise reverse
-    servo_L.write(0);  //left motor Clockwise for reverse
+    congruentMove(90,false);
     delay(500);  //  .5 second delay
     //rotate away from the edge
     servo_L.write(0);  //left motor Clockwise for reverse
@@ -221,8 +226,7 @@ bool edgeSense(){
   }
   else if(fLeftSensor.sensorState == LOW){
     //back up
-    servo_R.write(180); //right motor counterclockwise reverse
-    servo_L.write(0);  //left motor Clockwise for reverse
+    congruentMove(90,false);
     delay(500);  //  .5 second delay
     //rotate away from the edge
     servo_R.write(180);    // spin right motor backwards
