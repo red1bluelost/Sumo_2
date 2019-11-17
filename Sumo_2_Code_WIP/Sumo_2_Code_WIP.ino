@@ -1,7 +1,6 @@
-/* Sumo_1_Code
- * Micah Weston and Kelli Vallentini
+/* Sumo_2_Code
+ * Group 8
  * Cornerstone of Engineering 1
- * Professor Richard Whalen 
  */
 #include <Servo.h>  // servo library  Note including this library diables PWM on pins 9, 10 Analogue writes will no longer
                      // work there but digital will
