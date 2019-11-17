@@ -14,15 +14,25 @@ struct DistanceSensor {
   float distance;     //stores the distance measure by the distance sensor
 };
 //sets structs to hold pins for the Front, Left, and Right
-DistanceSensor FrontDist {5,6};
-DistanceSensor LeftDist {2,3};
-DistanceSensor RightDist {4,7};
+DistanceSensor FrontDist {5,6,0};
+DistanceSensor LeftDist {2,3,0};
+DistanceSensor RightDist {4,7,0};
 
 //constants for motor pins
 const int rightMotor = 12;
 const int leftMotor = 13;
 
-//constants for the FRONT side sensors
+//creates a struct for the LED sensor pin and value
+struct LEDSensor {
+  const int Sensor;   //Assign sensor pins for down sensor
+  int sensorState;    //Sensor variable
+};
+//sets structs to hold pins and variables for Front right and left and back right and left
+LEDSensor fLeftSensor {10,0};
+LEDSensor fRightSensor {9,0};
+LEDSensor bLeftSensor {8,0};
+LEDSensor bRightSensor {11,0};
+/*//constants for the FRONT side sensors
 const int leftSensor = 10;     // Assign sensor pins for two down sensors
 const int rightSensor = 9;
 //variable for the FRONT sensor states
@@ -33,7 +43,7 @@ const int BACKleftSensor = 8;     // Assign sensor pins for two down sensors
 const int BACKrightSensor = 11;
 //variable for the BACK sensor states
 int BACKlsensorState = 0;          // Initialize sensor variable 
-int BACKrsensorState = 0;
+int BACKrsensorState = 0;*/
 
 //bool used with functions to break loops
 bool dontRepeat = false;  //for edge sensing causing a breaking in code
@@ -53,8 +63,8 @@ void setup() {
   servo_L.attach(leftMotor);  //connect Left motor single wire to Digital Port leftMotor
 
   //set up sensors
-  pinMode(leftSensor, INPUT);   // Declare assigned sensor pins as input
-  pinMode(rightSensor, INPUT);
+  pinMode(fLeftSensor.Sensor, INPUT);   // Declare assigned sensor pins as input
+  pinMode(fRightSensor.Sensor, INPUT);
 
   //starts from a stop
   servo_R.write(90);
@@ -200,11 +210,11 @@ void moveAndTurn(char lORr, float turnRate){ //curved movement, turnRate 1-180 f
 //function to check edge sensors and perform evasion movement and tells code if it was sensed
 bool edgeSense(){
   //read sensors
-  rsensorState = digitalRead(rightSensor);  //read right sensor
-  lsensorState = digitalRead(leftSensor);   //read left sensor
+  fRightSensor.sensorState = digitalRead(fRightSensor.Sensor);  //read right sensor
+  fLeftSensor.sensorState = digitalRead(fLeftSensor.Sensor);   //read left sensor
   
   //execute evasion pattern if something is sensed
-  if(rsensorState == LOW){  //if the right sensor is triggered
+  if(fRightSensor.sensorState == LOW){  //if the right sensor is triggered
     //back up
     servo_R.write(180); //right motor counterclockwise reverse
     servo_L.write(0);  //left motor Clockwise for reverse
@@ -215,7 +225,7 @@ bool edgeSense(){
     //delay(700);  //  .7 second delay to turn far enough
     return true;  //return that the edge was hit
   }
-  else if(lsensorState == LOW){
+  else if(fLeftSensor.sensorState == LOW){
     //back up
     servo_R.write(180); //right motor counterclockwise reverse
     servo_L.write(0);  //left motor Clockwise for reverse
