@@ -15,6 +15,10 @@ const int echoPin = 6;           //connects to the trigger pin on the distance s
 //variable to hold the distance from the sensor
 float distanceFront = 0;               //stores the distance measured by the distance sensor
 
+//constants for motor pins
+const int rightMotor = 12;
+const int leftMotor = 13;
+
 //constants for the side sensors
 const int leftSensor = 10;     // Assign sensor pins for two down sensors
 const int rightSensor = 9;
@@ -36,8 +40,8 @@ void setup() {
   pinMode(echoPin, INPUT);    //the echo pin will measure the duration of pulses coming back from the distance sensor
 
   //set up motors
-  servo_R.attach(12);  //connect Right motor single wire to Digital Port 12
-  servo_L.attach(13);  //connect Left motor single wire to Digital Port 13 
+  servo_R.attach(rightMotor);  //connect Right motor single wire to Digital Port 12
+  servo_L.attach(leftMotor);  //connect Left motor single wire to Digital Port 13 
 
   //set up sensors
   pinMode(leftSensor, INPUT);   // Declare assigned sensor pins as input
