@@ -8,23 +8,39 @@
 Servo servo_R;  //declare servo objects first -servo_R for right side and servo_L for left
 Servo servo_L;
 
-//constants for the front facing distance sensor
+//constants for the FRONT facing distance sensor
 const int trigPin = 5;           //connects to the echo pin on the distance sensor       
 const int echoPin = 6;           //connects to the trigger pin on the distance sensor     
+//constants for the LEFT facing distance sensor
+const int LEFTtrigPin = 2;           //connects to the echo pin on the distance sensor       
+const int LEFTechoPin = 3;           //connects to the trigger pin on the distance sensor
+//constants for the RIGHT facing distance sensor
+const int RIGHTtrigPin = 4;           //connects to the echo pin on the distance sensor       
+const int RIGHTechoPin = 7;           //connects to the trigger pin on the distance sensor
 
-//variable to hold the distance from the sensor
+//variable to hold the distance from the FRONT sensor
 float distanceFront = 0;               //stores the distance measured by the distance sensor
+//variable to hold the distance from the LEFT sensor
+float distanceLEFT = 0;               //stores the distance measured by the distance sensor
+//variable to hold the distance from the RIGHT sensor
+float distanceRIGHT = 0;               //stores the distance measured by the distance sensor
 
 //constants for motor pins
 const int rightMotor = 12;
 const int leftMotor = 13;
 
-//constants for the side sensors
+//constants for the FRONT side sensors
 const int leftSensor = 10;     // Assign sensor pins for two down sensors
 const int rightSensor = 9;
-//variable for the sensor states
+//variable for the FRONT sensor states
 int lsensorState = 0;          // Initialize sensor variable 
 int rsensorState = 0;
+//constants for the BACK side sensors
+const int BACKleftSensor = 8;     // Assign sensor pins for two down sensors
+const int BACKrightSensor = 11;
+//variable for the BACK sensor states
+int BACKlsensorState = 0;          // Initialize sensor variable 
+int BACKrsensorState = 0;
 
 //bool used with functions to break loops
 bool dontRepeat = false;  //for edge sensing causing a breaking in code
@@ -40,8 +56,8 @@ void setup() {
   pinMode(echoPin, INPUT);    //the echo pin will measure the duration of pulses coming back from the distance sensor
 
   //set up motors
-  servo_R.attach(rightMotor);  //connect Right motor single wire to Digital Port 12
-  servo_L.attach(leftMotor);  //connect Left motor single wire to Digital Port 13 
+  servo_R.attach(rightMotor);  //connect Right motor single wire to Digital Port rightMotor
+  servo_L.attach(leftMotor);  //connect Left motor single wire to Digital Port leftMotor
 
   //set up sensors
   pinMode(leftSensor, INPUT);   // Declare assigned sensor pins as input
