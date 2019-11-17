@@ -89,12 +89,7 @@ void loop() {
   //Starting point for all loops after first
 
   //1.0 spin and scan for another robot
-  do{     //spin and scan loop
-    distanceFront = getDistance();  //check for robot in front sensor
-    Serial.print(distanceFront);     //print the distance that was measured
-    Serial.println(" in");      //print units after the distance
-    edgeSense();  //make sure not to run off the edge of the mat
-  }while(distanceFront > 20);   //keep scanning until something is seen within 24 inches
+  spinAndScan(20);  //20 inch range detection
   
   //2.0 If something is seen within 24 inches, charge
   charge(90,'f');
@@ -225,7 +220,6 @@ bool edgeSense(){
     servo_L.write(0);  //left motor Clockwise for reverse
     servo_R.write(0);   //right motor clockwise forward
     //delay(700);  //  .7 second delay to turn far enough
-    Serial.println("Right Sensor");
     return true;  //return that the edge was hit
   }
   else if(lsensorState == LOW){
@@ -237,9 +231,15 @@ bool edgeSense(){
     servo_R.write(180);    // spin right motor backwards
     servo_L.write(180);    // spin Left motor forwards
     //delay(700);  //  .25 second delay
-    Serial.println("Left Sensor") ;
     return true;  //return that the edge was hit
   }
   else  //do nothing if nothing is sensed
     return false; //return that the edge was not hit
+}
+
+void spinAndScan(int range){
+    do{     //spin and scan loop
+    distanceFront = getDistance();  //check for robot in front sensor
+    edgeSense();  //make sure not to run off the edge of the mat
+  }while(distanceFront > range);   //keep scanning until something is seen within 24 inches
 }
