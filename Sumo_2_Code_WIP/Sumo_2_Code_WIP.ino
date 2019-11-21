@@ -237,3 +237,16 @@ void spinAndScan(int range){
     edgeSense();  //make sure not to run off the edge of the mat
   }while(FrontDist.distance > range);   //keep scanning until something is seen within 24 inches
 }
+
+void evadeSide() {
+  int near = 3;   //distance of what will be considered near
+  getDistance(LeftDist);
+  getDistance(RightDist);
+  if (LeftDist.distance < 3){ //if something near on left do evasive manuver
+    servo_R.write(180);
+    servo_L.write(90);
+  } else if (RightDist.distance < 3){ //if something near on right do evasive manuver
+    servo_R.write(90);
+    servo_L.write(0);
+  }
+}
