@@ -39,6 +39,10 @@ bool dontRepeat = false;  //for edge sensing causing a breaking in code
 //bool to be used to only run the starting strategy on the first loop
 bool startStrat;   //runs the starting strategy
 
+//variable for cancelling delay
+long int cancelEvadePreTime = 0;
+long int cancelEvadeCurTime = 0;
+
 void setup() {
   Serial.begin (9600);        //set up a serial connection with the computer
 
@@ -70,9 +74,7 @@ void setup() {
 void loop() {
   //no movement so we can just test sensors.
   congruentMove(90,true);
-  safeDelay(5000);
-  congruentMove(0,true);
-  safeDelay(5000);
+  safeDelay(1000);
 }
 
 //------------------FUNCTIONS-------------------------------
@@ -260,18 +262,34 @@ bool matSense() {
   return edgeSense() || backSense();
 }
 
-void evadeSide() {
-  int near = 3;   //distance of what will be considered near
+bool evadeSide() {
   getDistance(LeftDist);
   getDistance(RightDist);
-  if (LeftDist.distance < 3  && LeftDist.distance > 0.2){ //if something near on left do evasive manuver
-    servo_R.write(180);
-    servo_L.write(90);
+  if (cancelEvade(cancelEvadeCurTime, cancelEvadePreTime)){
+    if (LeftDist.distance < 3  && LeftDist.distance > 0.2){ //if something near (< 3 inch) on left do evasive manuver
+      servo_R.write(180);
+      servo_L.write(90);
+      safeDelay(800);
+      return true;
+    }
+    if (RightDist.distance < 3 && RightDist.distance > 0.2){ //if something near (< 3 inch) on right do evasive manuver
+      servo_R.write(90);
+      servo_L.write(0);
+      safeDelay(800);
+      return true;
+    }
   }
-  if (RightDist.distance < 3 && RightDist.distance > 0.2){ //if something near on right do evasive manuver
-    servo_R.write(90);
-    servo_L.write(0);
+  return false;
+}
+
+//cancelEvade for chose delay  copy:    cancelEvade(cancelEvadeCurTime, cancelEvadePreTime)
+bool cancelEvade(long int &current, long int &previous){
+  current = millis();
+  if (current - 10000 < previous) {
+    return false;
   }
+  previous = current;
+  return true;
 }
 
 void safeDelay(long int interval) {
@@ -279,7 +297,7 @@ void safeDelay(long int interval) {
   timeTest = interval + millis();
   do{
     currentTime = millis();
-    if (matSense()){
+    if (matSense() || evadeSide()){
       break;
     }
   }while(currentTime < timeTest);
