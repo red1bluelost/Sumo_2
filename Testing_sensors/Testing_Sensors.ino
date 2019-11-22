@@ -69,14 +69,15 @@ void setup() {
 
 void loop() {
   //no movement so we can just test sensors.
-  evadeSide();
-  backSense();
-  delay(1000);
+  congruentMove(90,true);
+  safeDelay(5000);
   congruentMove(0,true);
-  delay(1000);
+  safeDelay(5000);
 }
 
 //------------------FUNCTIONS-------------------------------
+
+//----Functions to be used in other functions---------------
 
 //RETURNS THE DISTANCE MEASURED BY THE HC-SR04 DISTANCE SENSOR
 void getDistance(DistanceSensor& sensor)
@@ -114,6 +115,8 @@ void congruentMove(int moveSpeed, bool forward) {
   }
 } //end motorMove()
 
+//----Functions to be used for guiding robot actions----------------------------------
+
 //Input desired distance (in) and speed 1-90 and direction
 void straightMove(float range, float moveSpeed, char goOrBack){ //input range (inch), speed (1-90), and f or b for direction
 
@@ -135,7 +138,7 @@ void straightMove(float range, float moveSpeed, char goOrBack){ //input range (i
   } //end switch to move forward or back at a certain speed
 
   //move for certain time
-  delay(distanceFromRange);
+  safeDelay(distanceFromRange);
 }
 
 void charge(float moveSpeed, char goOrBack){ //set to move without any delays
@@ -163,7 +166,7 @@ void turnHold(char lORr, bool doAngle, float angle) { //turn left or right, if d
       break;
   }
   if(doAngle){  //turn for certain amount of degrees
-    delay((angle/360)*3350);
+    safeDelay((angle/360)*3350);
     congruentMove(0,true); //stop after rotation finishes
   }
 }
@@ -181,6 +184,15 @@ void moveAndTurn(char lORr, float turnRate){ //curved movement, turnRate 1-180 f
       break;
   }
 }
+
+void spinAndScan(int range){
+    do{     //spin and scan loop
+    getDistance(FrontDist);  //check for robot in front sensor
+    edgeSense();  //make sure not to run off the edge of the mat
+  }while(FrontDist.distance > range);   //keep scanning until something is seen within 24 inches
+}
+
+//----Safety functions to be used to perform evasive measures----------------------------
 
 //function to check edge sensors and perform evasion movement and tells code if it was sensed
 bool edgeSense(){
@@ -237,8 +249,6 @@ bool backSense(){
     //rotate away from the edge
     servo_R.write(180);    // spin right motor backwards
     servo_L.write(180);    // spin Left motor forwards
-    servo_L.write(0);  //left motor Clockwise for reverse
-    servo_R.write(0);   //right motor clockwise forward
     //delay(700);  //  .25 second delay
     return true;  //return that the edge was hit
   }
@@ -246,11 +256,8 @@ bool backSense(){
     return false; //return that the edge was not hit
 }
 
-void spinAndScan(int range){
-    do{     //spin and scan loop
-    getDistance(FrontDist);  //check for robot in front sensor
-    edgeSense();  //make sure not to run off the edge of the mat
-  }while(FrontDist.distance > range);   //keep scanning until something is seen within 24 inches
+bool matSense() {
+  return edgeSense() || backSense();
 }
 
 void evadeSide() {
@@ -265,4 +272,15 @@ void evadeSide() {
     servo_R.write(90);
     servo_L.write(0);
   }
+}
+
+void safeDelay(long int interval) {
+  long int timeTest, currentTime;
+  timeTest = interval + millis();
+  do{
+    currentTime = millis();
+    if (matSense()){
+      break;
+    }
+  }while(currentTime < timeTest);
 }
