@@ -70,8 +70,10 @@ void setup() {
 void loop() {
   //no movement so we can just test sensors.
   evadeSide();
+  backSense();
   delay(1000);
   congruentMove(0,true);
+  delay(1000);
 }
 
 //------------------FUNCTIONS-------------------------------
@@ -95,10 +97,13 @@ void getDistance(DistanceSensor& sensor)
   calculatedDistance = 0.9831*calculatedDistance + 0.14; //change to actual distance based on Excel Data Analysis
   
   sensor.distance = calculatedDistance;              //send back the distance that was calculated
+
+      Serial.print(sensor.distance);     //print the distance that was measured
+    Serial.println(" in");      //print units after the distance
 }
 
 //function to use when writing to the motors to move at the same speed
-void congruentMove(float moveSpeed, bool forward) {
+void congruentMove(int moveSpeed, bool forward) {
   if(forward) { //move forward
     servo_R.write(90-moveSpeed);
     servo_L.write(90+moveSpeed);
@@ -208,6 +213,39 @@ bool edgeSense(){
     return false; //return that the edge was not hit
 }
 
+//function to check back sensors and perform evasion movement and tells code if it was sensed
+bool backSense(){
+  //read sensors
+  bRightSensor.sensorState = digitalRead(bRightSensor.Sensor);  //read right sensor
+  bLeftSensor.sensorState = digitalRead(bLeftSensor.Sensor);   //read left sensor
+  
+  //execute evasion pattern if something is sensed
+  if(bRightSensor.sensorState == LOW){  //if the right sensor is triggered
+    //back up
+    congruentMove(90,true);
+    delay(500);  //  .5 second delay
+    //rotate away from the edge
+    servo_L.write(0);  //left motor Clockwise for reverse
+    servo_R.write(0);   //right motor clockwise forward
+    //delay(700);  //  .7 second delay to turn far enough
+    return true;  //return that the edge was hit
+  }
+  else if(bLeftSensor.sensorState == LOW){
+    //back up
+    congruentMove(90,true);
+    delay(500);  //  .5 second delay
+    //rotate away from the edge
+    servo_R.write(180);    // spin right motor backwards
+    servo_L.write(180);    // spin Left motor forwards
+    servo_L.write(0);  //left motor Clockwise for reverse
+    servo_R.write(0);   //right motor clockwise forward
+    //delay(700);  //  .25 second delay
+    return true;  //return that the edge was hit
+  }
+  else  //do nothing if nothing is sensed
+    return false; //return that the edge was not hit
+}
+
 void spinAndScan(int range){
     do{     //spin and scan loop
     getDistance(FrontDist);  //check for robot in front sensor
@@ -219,10 +257,11 @@ void evadeSide() {
   int near = 3;   //distance of what will be considered near
   getDistance(LeftDist);
   getDistance(RightDist);
-  if (LeftDist.distance < 3){ //if something near on left do evasive manuver
+  if (LeftDist.distance < 3  && LeftDist.distance > 0.2){ //if something near on left do evasive manuver
     servo_R.write(180);
     servo_L.write(90);
-  } else if (RightDist.distance < 3){ //if something near on right do evasive manuver
+  }
+  if (RightDist.distance < 3 && RightDist.distance > 0.2){ //if something near on right do evasive manuver
     servo_R.write(90);
     servo_L.write(0);
   }
