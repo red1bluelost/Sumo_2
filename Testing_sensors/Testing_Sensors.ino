@@ -157,17 +157,6 @@ void straightMove(float range, float moveSpeed, char goOrBack){ //input range (i
   safeDelay(distanceFromRange);
 }
 
-void charge(float moveSpeed, char goOrBack){ //set to move without any delays
-  //set motors to move at the speed
-  switch(goOrBack){
-    case 'f': //move forward
-    congruentMove(moveSpeed,true);
-    break;
-    case 'b': //move back
-    congruentMove(moveSpeed,false);
-    break;
-  } //end switch to move forward or back at a certain speed
-}
 
 //a function to turn the robot and with the option of rotating for a specific angle of rotation
 void turnHold(char lORr, bool doAngle, float angle) { //turn left or right, if doAngle how much of an angle (degrees)
