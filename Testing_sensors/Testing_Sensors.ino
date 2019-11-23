@@ -40,7 +40,7 @@ bool dontRepeat = false;  //for edge sensing causing a breaking in code
 //bool to be used to only run the starting strategy on the first loop
 bool startStrat;   //runs the starting strategy
 
-//allows checking if a certain amount of time passed
+//class to create objects that allow checking if a certain amount of time passed
 class TimeTest {
   private:
   long int preTime;
@@ -52,6 +52,7 @@ class TimeTest {
   void ResetTime();
 };
 
+//create instances of TimeTest for testing if time has pas
 TimeTest TTEvadeSide;
 
 void setup() {
@@ -129,7 +130,7 @@ void congruentMove(int moveSpeed, bool forward) {
     servo_R.write(90+moveSpeed);
     servo_L.write(90-moveSpeed);
   }
-} //end motorMove()
+} //end congruentMove()
 
 //----Functions to be used for guiding robot actions----------------------------------
 
@@ -156,7 +157,6 @@ void straightMove(float range, float moveSpeed, char goOrBack){ //input range (i
   //move for certain time
   safeDelay(distanceFromRange);
 }
-
 
 //a function to turn the robot and with the option of rotating for a specific angle of rotation
 void turnHold(char lORr, bool doAngle, float angle) { //turn left or right, if doAngle how much of an angle (degrees)
@@ -193,11 +193,28 @@ void moveAndTurn(char lORr, float turnRate){ //curved movement, turnRate 1-180 f
 void spinAndScan(int range){
     do{     //spin and scan loop
     getDistance(FrontDist);  //check for robot in front sensor
-    if (matSense()){  //make sure not to run off the edge of the mat
+    getDistance(LeftDist);
+    getDistance(RightDist);
+    if (LeftDist.distance < range) {
+      turnHold('l',false,0);
+    } else if (RightDist.distance < range) {
+      turnHold('r',false,0);
+    }
+    
+    if (matSense() || evadeSide()){  //make sure not to run off the edge of the mat
       break;
     }
   }while(FrontDist.distance > range);   //keep scanning until something is seen within 24 inches
   congruentMove(90,true);
+}
+
+//function to keep the most recent command running unless an evasive measure is necessary
+void holdCommand() {
+  for(;;){
+    if (matSense() || evadeSide()){  //make sure not to run off the edge of the mat
+      break;
+    }
+  }
 }
 
 //----Safety functions to be used to perform evasive measures----------------------------
