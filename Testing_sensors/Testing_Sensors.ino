@@ -1,3 +1,4 @@
+
 /* Sumo_2_Code
  * Group 8
  * Cornerstone of Engineering 1
@@ -39,9 +40,19 @@ bool dontRepeat = false;  //for edge sensing causing a breaking in code
 //bool to be used to only run the starting strategy on the first loop
 bool startStrat;   //runs the starting strategy
 
-//variable for cancelling delay
-long int cancelEvadePreTime = 0;
-long int cancelEvadeCurTime = 0;
+//allows checking if a certain amount of time passed
+class TimeTest {
+  private:
+  long int preTime;
+  long int interval;
+  public:
+  TimeTest();
+  void SetIntvl(long int);
+  bool TimePassTest();
+  void ResetTime();
+};
+
+TimeTest TTEvadeSide;
 
 void setup() {
   Serial.begin (9600);        //set up a serial connection with the computer
@@ -69,11 +80,14 @@ void setup() {
 
   //do starting strategy only after set up
   startStrat = true;
+
+  //set TimeTest intervals
+  TTEvadeSide.SetIntvl(10000);
 }
 
 void loop() {
   //no movement so we can just test sensors.
-  congruentMove(90,true);
+  congruentMove(0,true);
   safeDelay(1000);
 }
 
@@ -190,8 +204,11 @@ void moveAndTurn(char lORr, float turnRate){ //curved movement, turnRate 1-180 f
 void spinAndScan(int range){
     do{     //spin and scan loop
     getDistance(FrontDist);  //check for robot in front sensor
-    edgeSense();  //make sure not to run off the edge of the mat
+    if (matSense()){  //make sure not to run off the edge of the mat
+      break;
+    }
   }while(FrontDist.distance > range);   //keep scanning until something is seen within 24 inches
+  congruentMove(90,true);
 }
 
 //----Safety functions to be used to perform evasive measures----------------------------
@@ -265,40 +282,50 @@ bool matSense() {
 bool evadeSide() {
   getDistance(LeftDist);
   getDistance(RightDist);
-  if (cancelEvade(cancelEvadeCurTime, cancelEvadePreTime)){
+  if (TTEvadeSide.TimePassTest()){
     if (LeftDist.distance < 3  && LeftDist.distance > 0.2){ //if something near (< 3 inch) on left do evasive manuver
       servo_R.write(180);
       servo_L.write(90);
-      safeDelay(800);
+      delay(800);
+      TTEvadeSide.ResetTime();
       return true;
     }
     if (RightDist.distance < 3 && RightDist.distance > 0.2){ //if something near (< 3 inch) on right do evasive manuver
       servo_R.write(90);
       servo_L.write(0);
-      safeDelay(800);
+      delay(800);
+      TTEvadeSide.ResetTime();
       return true;
     }
   }
   return false;
 }
 
-//cancelEvade for chose delay  copy:    cancelEvade(cancelEvadeCurTime, cancelEvadePreTime)
-bool cancelEvade(long int &current, long int &previous){
-  current = millis();
-  if (current - 10000 < previous) {
-    return false;
-  }
-  previous = current;
-  return true;
-}
-
-void safeDelay(long int interval) {
+void safeDelay(long int intvl) {
   long int timeTest, currentTime;
-  timeTest = interval + millis();
+  timeTest = intvl + millis();
   do{
     currentTime = millis();
     if (matSense() || evadeSide()){
       break;
     }
   }while(currentTime < timeTest);
+}
+
+//----Time Test class methods---------------------------------
+
+TimeTest::TimeTest() {
+  preTime = 0;
+}
+void TimeTest::SetIntvl(long int i) {
+  interval = i;
+}
+bool TimeTest::TimePassTest(){
+  if (millis() - interval < preTime) {
+    return false;
+  }
+  return true;
+}
+void TimeTest::ResetTime() {
+  preTime = millis();
 }
