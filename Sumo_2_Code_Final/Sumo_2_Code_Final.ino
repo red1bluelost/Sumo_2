@@ -87,7 +87,7 @@ void setup() {
 
 void loop() {
   startStrategy(startStrat);
-  spinAndScan(24);
+  spinAndScan(30);
 }
 
 //------------------FUNCTIONS-------------------------------
@@ -182,16 +182,16 @@ void moveAndTurn(char lORr, float turnRate){ //curved movement, turnRate 1-180 f
 }
 
 void spinAndScan(int range){
-    do{     //spin and scan loop
+  do{     //spin and scan loop
     getDistance(FrontDist);  //check for robot in front sensor
     if (FrontDist.distance <= range){
       break;
     }
     getDistance(LeftDist);
     getDistance(RightDist);
-    if (LeftDist.distance < range) {
+    if (LeftDist.distance < (range/.8)) {
       turnHold('l',false,0);
-    } else if (RightDist.distance < range) {
+    } else if (RightDist.distance < (range/.8)) {
       turnHold('r',false,0);
     }
     
@@ -228,7 +228,7 @@ void holdCommand() {
 //function to check edge sensors and perform evasion movement and tells code if it was sensed
 bool edgeSense(){
   getDistance(FrontDist);
-  if (FrontDist.distance < 4 || FrontDist.distance > 900) {
+  if (FrontDist.distance < 4) {
     return false;
   }
   
