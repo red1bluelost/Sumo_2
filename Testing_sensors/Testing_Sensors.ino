@@ -1,4 +1,3 @@
-
 /* Sumo_2_Code
  * Group 8
  * Cornerstone of Engineering 1
@@ -87,9 +86,9 @@ void setup() {
 }
 
 void loop() {
-  //no movement so we can just test sensors.
-  congruentMove(0,true);
-  safeDelay(1000);
+  startStrategy(startStrat);
+  spinAndScan(24);
+  //congruentMove(90,true);
 }
 
 //------------------FUNCTIONS-------------------------------
@@ -116,8 +115,8 @@ void getDistance(DistanceSensor& sensor)
   
   sensor.distance = calculatedDistance;              //send back the distance that was calculated
 
-      Serial.print(sensor.distance);     //print the distance that was measured
-    Serial.println(" in");      //print units after the distance
+  Serial.print(sensor.distance);     //print the distance that was measured
+  Serial.println(" in");      //print units after the distance
 }
 
 //function to use when writing to the motors to move at the same speed
@@ -135,7 +134,7 @@ void congruentMove(int moveSpeed, bool forward) {
 //----Functions to be used for guiding robot actions----------------------------------
 
 //Input desired distance (in) and speed 1-90 and direction
-void straightMove(float range, float moveSpeed, char goOrBack){ //input range (inch), speed (1-90), and f or b for direction
+void straightMove(float range, float moveSpeed, bool forward){ //input range (inch), speed (1-90), and f or b for direction
 
   //calculate time needed for a chosen distance at a chosen speed
   float distanceFromRange;
@@ -145,14 +144,7 @@ void straightMove(float range, float moveSpeed, char goOrBack){ //input range (i
     distanceFromRange = (range * (5000/32.5));
 
   //set motors to move at the speed
-  switch(goOrBack){
-    case 'f': //move forward
-    congruentMove(moveSpeed,true);
-    break;
-    case 'b': //move back
-    congruentMove(moveSpeed,false);
-    break;
-  } //end switch to move forward or back at a certain speed
+  congruentMove(moveSpeed, forward);
 
   //move for certain time
   safeDelay(distanceFromRange);
@@ -193,6 +185,9 @@ void moveAndTurn(char lORr, float turnRate){ //curved movement, turnRate 1-180 f
 void spinAndScan(int range){
     do{     //spin and scan loop
     getDistance(FrontDist);  //check for robot in front sensor
+    if (FrontDist.distance <= range){
+      break;
+    }
     getDistance(LeftDist);
     getDistance(RightDist);
     if (LeftDist.distance < range) {
@@ -202,10 +197,22 @@ void spinAndScan(int range){
     }
     
     if (matSense() || evadeSide()){  //make sure not to run off the edge of the mat
-      break;
+      return;
     }
   }while(FrontDist.distance > range);   //keep scanning until something is seen within 24 inches
   congruentMove(90,true);
+  holdCommand();
+}
+
+//Strategy plays out only on the first run
+void startStrategy(bool &firstTime){
+  if (!firstTime) {  //check if it is first time to break or not
+    return;
+  }
+  turnHold('l',true, 55); //turn left
+  straightMove(16,90,'f');  //move to edge of the ring
+  turnHold('r',false,0);  //turn right to start scanning
+  firstTime = false;  //never repeat starting stragtegy
 }
 
 //function to keep the most recent command running unless an evasive measure is necessary
@@ -221,6 +228,11 @@ void holdCommand() {
 
 //function to check edge sensors and perform evasion movement and tells code if it was sensed
 bool edgeSense(){
+  getDistance(FrontDist);
+  if (FrontDist.distance < 4 || FrontDist.distance > 900) {
+    return false;
+  }
+  
   //read sensors
   fRightSensor.sensorState = digitalRead(fRightSensor.Sensor);  //read right sensor
   fLeftSensor.sensorState = digitalRead(fLeftSensor.Sensor);   //read left sensor
@@ -292,15 +304,19 @@ bool evadeSide() {
     if (LeftDist.distance < 3  && LeftDist.distance > 0.2){ //if something near (< 3 inch) on left do evasive manuver
       servo_R.write(180);
       servo_L.write(90);
-      delay(800);
+      delay(1600);
+      straightMove(6, 90, false);
+      turnHold('l',false,0);
       TTEvadeSide.ResetTime();
       return true;
     }
     if (RightDist.distance < 3 && RightDist.distance > 0.2){ //if something near (< 3 inch) on right do evasive manuver
       servo_R.write(90);
       servo_L.write(0);
-      delay(800);
+      delay(1600);
+      straightMove(6, 90, false);
       TTEvadeSide.ResetTime();
+      turnHold('r',false,0);
       return true;
     }
   }
