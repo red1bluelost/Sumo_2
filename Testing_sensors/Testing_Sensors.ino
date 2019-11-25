@@ -86,9 +86,9 @@ void setup() {
 }
 
 void loop() {
-  //startStrategy(startStrat);
-  //spinAndScan(30);
-  congruentMove(0,true);
+  startStrategy(startStrat);
+  spinAndScan(30);
+  //congruentMove(0,true);
   //getDistance(FrontDist);
   //delay(10);
 }
@@ -192,9 +192,9 @@ void spinAndScan(int range){
     }
     getDistance(LeftDist);
     getDistance(RightDist);
-    if (LeftDist.distance < (range/.8)) {
+    if (LeftDist.distance < (range*.8)) {
       turnHold('l',false,0);
-    } else if (RightDist.distance < (range/.8)) {
+    } else if (RightDist.distance < (range*.8)) {
       turnHold('r',false,0);
     }
     
@@ -230,10 +230,10 @@ void holdCommand() {
 
 //function to check edge sensors and perform evasion movement and tells code if it was sensed
 bool edgeSense(){
-  getDistance(FrontDist);
-  if (FrontDist.distance < 4) {
-    return false;
-  }
+  //getDistance(FrontDist);
+  //if (FrontDist.distance < 4) {
+  //  return false;
+  //}
   
   //read sensors
   fRightSensor.sensorState = digitalRead(fRightSensor.Sensor);  //read right sensor
@@ -243,7 +243,7 @@ bool edgeSense(){
   if(fRightSensor.sensorState == LOW){  //if the right sensor is triggered
     //back up
     congruentMove(90,false);
-    delay(500);  //  .5 second delay
+    delay(800);  //  .5 second delay
     //rotate away from the edge
     servo_L.write(0);  //left motor Clockwise for reverse
     servo_R.write(0);   //right motor clockwise forward
@@ -253,7 +253,7 @@ bool edgeSense(){
   else if(fLeftSensor.sensorState == LOW){
     //back up
     congruentMove(90,false);
-    delay(500);  //  .5 second delay
+    delay(800);  //  .5 second delay
     //rotate away from the edge
     servo_R.write(180);    // spin right motor backwards
     servo_L.write(180);    // spin Left motor forwards
@@ -274,7 +274,7 @@ bool backSense(){
   if(bRightSensor.sensorState == LOW){  //if the right sensor is triggered
     //back up
     congruentMove(90,true);
-    delay(500);  //  .5 second delay
+    delay(800);  //  .5 second delay
     //rotate away from the edge
     servo_L.write(0);  //left motor Clockwise for reverse
     servo_R.write(0);   //right motor clockwise forward
@@ -284,7 +284,7 @@ bool backSense(){
   else if(bLeftSensor.sensorState == LOW){
     //back up
     congruentMove(90,true);
-    delay(500);  //  .5 second delay
+    delay(800);  //  .5 second delay
     //rotate away from the edge
     servo_R.write(180);    // spin right motor backwards
     servo_L.write(180);    // spin Left motor forwards
