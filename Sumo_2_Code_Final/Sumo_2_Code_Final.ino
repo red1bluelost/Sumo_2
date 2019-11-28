@@ -129,6 +129,18 @@ void congruentMove(int moveSpeed, bool forward) {
   }
 } //end congruentMove()
 
+//keeps the most recent command running unless an evasive measure is invoked
+void holdCommand() {
+  //start infinite loop
+  for(;;){
+    //check if evasive measures have been invoked
+    if (matSense() || evadeSide()){
+      //breaks the infinite loop if an evasive measure was called
+      break;
+    }
+  } //end infinite loop
+} //end holdCommand()
+
 //----Functions to be used for guiding robot actions--------
 
 //Input desired distance (in) and speed (1-90) and direction to move straight for a chosen distance
@@ -236,18 +248,6 @@ void startStrategy(bool &firstTime){
   //sets bool to never repeat starting stragtegy
   firstTime = false;
 } //end startStrategy(...)
-
-//keeps the most recent command running unless an evasive measure is invoked
-void holdCommand() {
-  //start infinite loop
-  for(;;){
-    //check if evasive measures have been invoked
-    if (matSense() || evadeSide()){
-      //breaks the infinite loop if an evasive measure was called
-      break;
-    }
-  } //end infinite loop
-} //end holdCommand()
 
 //--Safety functions to be used to perform evasive measures-
 
